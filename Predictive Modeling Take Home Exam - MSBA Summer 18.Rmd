@@ -1,0 +1,871 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+---
+title: "Predictive Modeling Take Home Exam - MSBA Summer 2018"
+author: "Hope Knopf"
+date: 8/2/2018
+output: html_document
+
+###Chapter 2 #10
+####10a
+```{r}
+rm(list=ls())
+library(MASS)
+data=Boston
+attach(data)
+dim(data)
+```
+There are 506 rows and 14 columns;
+this means there are 506 Boston suburbs observed and 14 variables
+
+
+####10b
+```{r}
+pairs(data)
+```
+
+crim variable is significantly correlated with age, dis, rad, tax, medv and ptratio
+
+
+####10c
+
+
+```{r}
+par(mfrow=c(1, 5))
+plot(age, crim)
+plot(dis, crim)
+plot(rad, crim)
+plot(tax, crim)
+plot(ptratio, crim)
+plot(medv, crim)
+```
+
+
+Older homes associated with higher crime rate;
+Lower distance (ie closer) to employment centres associated with higher crime rate;
+Higher accessibility to radial highways associated with higher crime rate;
+Higher property tax rate associated with higher crime rate;
+Higher pupil-teacher ratio associated with higher crime rate;
+Lower median value of homes associated with higher crime rate
+
+####10d
+
+```{r}
+summary(crim)
+summary(tax)
+summary(ptratio)
+
+par(mfrow=c(1,3))
+boxplot(crim, main='Crime Rate')
+boxplot(tax, main='Tax Rate')
+boxplot(ptratio, main='Pupil-teacher ratio')
+```
+
+
+
+Very large range of crime rates;
+Large range of tax rates;
+Smaller range of pupil-teacher ratios
+
+
+####10e
+
+```{r}
+summary(chas)
+margin.table(table(crim,chas),2)
+```
+
+
+chas=1 means the suburb bounds the river;
+
+35 suburbs in the datasetbound the river 
+
+####10f
+```{r}
+median(ptratio)
+```
+Median pupil-teacher ratio is 19.05
+
+####10g
+
+
+```{r}
+summary(medv)
+
+values = data[order(medv),]
+x=sapply(data, summary)
+y=values[c(1,2),]
+z=as.data.frame(rbind(y,x))
+
+z1 = z[, 1:7] 
+z2 = z[, 8:14] 
+z1
+z2
+```
+
+Lowest median value of homes in a Boston suburb is $5,000
+
+Suburb 399 and 406 have the lowest median values of owner-occupied homes;
+They have well above the mean crime rate at 38.35%and 67.92% 
+
+Both have 100% of homes built prior to 1940 as compared to an average of 68.57% home built before 1940 across the dataset
+
+Closer to employment centers at 1.49 and 1.43 than the average of3.80
+
+Higher accessibility to radial highways than average;
+Higher pupil-teacher ratio than average;
+Higher full-value property tax rate than average
+
+####10h
+
+```{r}
+length(rm[rm > 7]) 
+
+
+length(rm[rm > 8])
+
+
+summary(data[which(rm>8),])
+```
+
+64 suburbs average more than 7 rooms per dwelling
+
+13 suburbs average more than 8 rooms per dwelling
+
+Suburbs that average more than 8 rooms per dwelling have a lower crime rate than the overall average,higher median value than overall average, lower status of population than the overall average
+
+
+###Chapter 3 #15
+####15a
+
+```{r}
+rm(list=ls())
+
+library(MASS)
+data=Boston
+attach(data)
+
+par(mfrow=c(1,4))
+chas = factor(chas, labels=c('N','Y'))
+
+lm.zn=lm(crim~zn)
+summary(lm.zn)
+plot(lm.zn)
+
+lm.indus = lm(crim~indus)
+summary(lm.indus) 
+plot(lm.indus)
+
+lm.chas = lm(crim~chas) 
+summary(lm.chas) 
+plot(lm.chas)
+
+lm.nox = lm(crim~nox) 
+summary(lm.nox) 
+plot(lm.nox)
+
+lm.rm = lm(crim~rm) 
+summary(lm.rm) 
+plot(lm.rm)
+
+lm.age = lm(crim~age) 
+summary(lm.age) 
+plot(lm.age)
+
+lm.dis = lm(crim~dis) 
+summary(lm.dis)
+plot(lm.dis)
+
+lm.rad = lm(crim~rad) 
+summary(lm.rad) 
+plot(lm.rad)
+
+lm.tax = lm(crim~tax)
+summary(lm.tax) 
+plot(lm.tax)
+
+lm.ptratio = lm(crim~ptratio) 
+summary(lm.ptratio) 
+plot(lm.ptratio)
+
+lm.black = lm(crim~black) 
+summary(lm.black) 
+plot(lm.black)
+
+lm.lstat = lm(crim~lstat) 
+summary(lm.lstat) 
+plot(lm.lstat)
+
+lm.medv = lm(crim~medv)
+summary(lm.medv) 
+plot(lm.medv)
+```
+
+
+All variables stastically significant except for chas 
+
+
+####15b
+```{r}
+lm.fit = lm(crim~., data = Boston)
+summary(lm.fit)
+```
+Can reject the null hypothesis for zn, dis, rad, medv and black because they have significant coefficients ie beta is not equal to 0
+
+####15c
+```{r}
+x = c(coefficients(lm.zn)[2], coefficients(lm.indus)[2], coefficients(lm.chas)[2], coefficients(lm.nox)[2], coefficients(lm.rm)[2], coefficients(lm.age)[2], coefficients(lm.dis)[2], coefficients(lm.rad)[2], coefficients(lm.tax)[2], coefficients(lm.ptratio)[2], coefficients(lm.black)[2], coefficients(lm.lstat)[2], coefficients(lm.medv)[2])
+y = coefficients(lm.fit)[-1]
+plot(y~x)
+```
+
+The results are fairly comparable, nox is the only predictor not in the cluster on the top left corner of the plot, thus nox is the only outlier
+
+####15d
+
+```{r}
+lm.zn = lm(crim~poly(zn,3)) 
+summary(lm.zn)
+```
+shows support for x^2
+
+```{r}
+lm.indus = lm(crim~poly(indus,3)) 
+summary(lm.indus)
+```
+shows support for x^2 and x^3
+
+```{r}
+lm.nox = lm(crim~poly(nox,3)) 
+summary(lm.nox)
+```
+shows support for x^2 and x^3
+
+```{r}
+lm.rm = lm(crim~poly(rm,3))
+summary(lm.rm)
+```
+shows support for x^2
+
+```{r}
+lm.age = lm(crim~poly(age,3))
+summary(lm.age)
+```
+shows support for x^2 and x^3
+
+
+```{r}
+lm.dis = lm(crim~poly(dis,3))
+summary(lm.dis)
+```
+shows support for x^2 and x^3
+
+```{r}
+lm.rad = lm(crim~poly(rad,3)) 
+summary(lm.rad)
+```
+shows support for x^2
+
+```{r}
+lm.tax = lm(crim~poly(tax,3))
+summary(lm.tax)
+```
+shows support for x^2
+
+
+```{r}
+lm.ptratio = lm(crim~poly(ptratio,3)) 
+summary(lm.ptratio)
+```
+shows support for x^2 and x^3
+
+```{r}
+lm.black = lm(crim~poly(black,3)) 
+summary(lm.black)
+```
+shows support for x only
+
+```{r}
+lm.lstat = lm(crim~poly(lstat,3)) 
+summary(lm.lstat)
+```
+shows support for x^2
+
+```{r}
+lm.medv = lm(crim~poly(medv,3)) 
+summary(lm.medv)
+```
+shows support for x^2 and x^3
+
+chas does not have non-linear association with response variable crim
+
+###Chapter 6 #9
+####9a
+```{r}
+rm(list = ls())
+library(ISLR) 
+data = College 
+attach(data)
+set.seed(1)
+
+n=dim(data)
+ind = sample(1:n, size=0.2*nrow(data))
+train = data[-ind, ]
+test = data[ind, ]
+```
+
+
+####9b
+```{r}
+set.seed(1)
+lm.fit = lm(Apps~., data = train)
+lm.pred = predict(lm.fit, test)
+error = mean((test[, "Apps"] - lm.pred)^2) 
+error
+```
+Observed test error is 2046102
+
+####9c
+```{r}
+library(glmnet)
+
+set.seed(1)
+train.mat = model.matrix(Apps~., data=train)
+test.mat = model.matrix(Apps~., data=test)
+grid = 10^seq(4,-2, length=100)
+
+mod.ridge = cv.glmnet(train.mat, train[, "Apps"], alpha=0, lambda=grid, thresh=1e-12)
+lambda.best = mod.ridge$lambda.min
+
+ridge.pred = predict(mod.ridge, newx=test.mat, s=lambda.best)
+mean((test[, "Apps"] - ridge.pred)^2)
+```
+Observed test error is 2169911
+
+####9d
+```{r}
+set.seed(1)
+mod.lasso = cv.glmnet(train.mat, train[, "Apps"], alpha=1, lambda=grid, thresh=1e-12)
+lambda.best = mod.lasso$lambda.min
+
+lasso.pred = predict(mod.lasso, newx=test.mat, s=lambda.best)
+mean((test[, "Apps"] - lasso.pred)^2)
+```
+Observed test error is 2085586
+
+```{r}
+mod.lasso = glmnet(model.matrix(Apps~., data=College), College[, "Apps"], alpha=1)
+```
+Number of non-zero coefficient estimates shown in output above
+
+```{r}
+predict(mod.lasso, s=lambda.best, type="coefficients")
+```
+Number of non-zero coefficient estimates shown in output above
+
+
+####9e
+
+```{r}
+library(pls)
+set.seed(1)
+pcr.fit = pcr(Apps~., data=train, scale = TRUE, validation = "CV") 
+validationplot(pcr.fit, val.type="MSEP")
+summary(pcr.fit)
+
+pcr.pred = predict(pcr.fit, test, ncomp = 15) 
+pcr.error = mean((test[, 'Apps'] - data.frame(pcr.pred))^2)
+pcr.error
+```
+Obtained test error of 5239167
+
+####9f
+```{r}
+pls.fit = plsr(Apps~., data=train, scale=TRUE, validation='CV') 
+validationplot(pls.fit, val.type="MSEP")
+summary(pls.fit)
+
+set.seed(1)
+pls.pred = predict(pls.fit, test, ncomp = 10)
+pls.error = mean((test[, "Apps"] - data.frame(pls.pred))^2) 
+pls.error
+```
+Obtained test error of 2030057
+
+####9g
+```{r}
+test.avg = mean(test[, "Apps"])
+
+lm.test.r2 = 1 - mean((test[, "Apps"] - lm.pred)^2) /mean((test[, "Apps"] - test.avg)^2)
+
+ridge.test.r2 = 1 - mean((test[, "Apps"] - ridge.pred)^2) /mean((test[, "Apps"] - test.avg)^2)
+
+lasso.test.r2 = 1 - mean((test[, "Apps"] - lasso.pred)^2) /mean((test[, "Apps"] - test.avg)^2)
+
+pcr.test.r2 = 1 - mean((test[, "Apps"] - data.frame(pcr.pred))^2) /mean((test[, "Apps"] - test.avg)^2)
+
+pls.test.r2 = 1 - mean((test[, "Apps"] - data.frame(pls.pred))^2) /mean((test[, "Apps"] - test.avg)^2)
+
+barplot(c(lm.test.r2, ridge.test.r2, lasso.test.r2, pcr.test.r2, pls.test.r2), col="red", names.arg=c("OLS", "Ridge", "Lasso", "PCR", "PLS"), main="Test R-squared")
+
+```
+From the bar plot output above, the test R-sqaured for all models is around 0.9, with the exception of PCR, which had an R-sqaured around 0.8.  So the models predict college application with fairly high accuracy, except for PCR.
+
+####Chapter 6 #11
+####11a
+```{r}
+rm(list = ls())
+set.seed(100)
+library(MASS)
+library(leaps)
+library(glmnet)
+library(pls)
+
+data=Boston
+attach(data)
+```
+
+Best subset selection:
+```{r}
+predict.regsubsets = function(object, newdata, id, ...) {
+    form = as.formula(object$call[[2]])
+    mat = model.matrix(form, newdata)
+    coefi = coef(object, id = id)
+    mat[, names(coefi)] %*% coefi
+}
+
+k = 10
+p = ncol(data) - 1
+folds = sample(rep(1:k, length = nrow(data)))
+cv.errors = matrix(NA, k, p)
+for (i in 1:k) {
+    best.fit = regsubsets(crim~., data = Boston[folds != i, ], nvmax = p)
+    for (j in 1:p) {
+        pred = predict(best.fit, Boston[folds == i, ], id = j)
+        cv.errors[i, j] = mean((Boston$crim[folds == i] - pred)^2)
+    }
+}
+rmse.cv = sqrt(apply(cv.errors, 2, mean))
+plot(rmse.cv, pch = 19, type = "b")
+
+which.min(rmse.cv)
+rmse.cv[which.min(rmse.cv)]
+```
+
+lasso:
+```{r}
+x = model.matrix(crim~. -1, data = Boston)
+y = data$crim
+cv.lasso = cv.glmnet(x, y, type.measure = "mse")
+plot(cv.lasso)
+coef(cv.lasso)
+sqrt(cv.lasso$cvm[cv.lasso$lambda == cv.lasso$lambda.1se])
+
+```
+
+ridge regression:
+```{r}
+x = model.matrix(crim~. -1, data = Boston)
+y = data$crim
+cv.ridge = cv.glmnet(x, y, type.measure = "mse", alpha = 0)
+plot(cv.ridge)
+coef(cv.ridge)
+sqrt(cv.ridge$cvm[cv.ridge$lambda == cv.ridge$lambda.1se])
+```
+
+PCR:
+```{r}
+library(pls)
+pcr.fit = pcr(crim~., data = Boston, scale = TRUE, validation = "CV")
+validationplot(pcr.fit, val.type="MSEP")
+summary(pcr.fit)
+```
+
+The best subset model and PCR model have comparable RMSE
+lasso and ridge have higher RMSE
+
+####11b
+I would propose the 9 component best subset model for this dataset, it's cross-validated RMSE was best and it is simpler than the PCR, which had a similar RMSE but 13 components
+
+####11c
+Model has 9 components, which is simpler, as stated in part (b)
+
+###Chapter 4 #10(not e & f)
+####10a
+```{r}
+rm(list = ls())
+library(ISLR) 
+data=Weekly 
+attach(Weekly)
+
+summary(data)
+cor(data[,-9])
+pairs(data)
+```
+
+year and volume related 
+
+####10b
+```{r}
+glm.fit=glm(Direction~Lag1+Lag2+Lag3+Lag4+Lag5+Volume, data=Weekly, family=binomial)
+
+summary(glm.fit)
+```
+Lag 2 variable is statistically significant 
+
+####10c
+```{r}
+glm.probs=predict(glm.fit, type='response')
+
+glm.pred=rep('Down', length(glm.probs))
+glm.pred[glm.probs>.5] = 'Up'
+table(glm.pred, data$Direction)
+```
+56.1% overall correct predictions
+
+92.1% Market Up correct predictions
+
+11.2% Market Down correct predictions
+
+So logistic regression is right most of the time when the market is up, and wrong most of the time when the market is down
+
+
+####10d
+```{r}
+train=(Year<2009)
+test=data[!train, ]
+
+glm.fit = glm(Direction ~ Lag2, data=Weekly, family = binomial, subset=train)
+glm.probs = predict(glm.fit, test, type = "response")
+
+glm.pred = rep("Down", length(glm.probs))
+glm.pred[glm.probs > 0.5] = "Up"
+
+Dir=Direction[!train]
+table(glm.pred, Dir)
+
+mean(glm.pred == Dir)
+
+```
+
+
+####Skip 10e
+####Skip 10f
+
+
+####10g
+```{r}
+library(class)
+train.X = as.matrix(Lag2[train])
+test.X = as.matrix(Lag2[!train])
+train.Direction = Direction[train]
+
+set.seed(1)
+knn.pred = knn(train.X, test.X, train.Direction, k = 1)
+
+table(knn.pred, Dir)
+
+mean(knn.pred == Dir)
+```
+
+####10h
+logistic regression provides best results
+
+####10i
+#####Logistic regression with Lag2:Lag1:
+```{r}
+glm.fit = glm(Direction ~ Lag2:Lag1, data = Weekly, family = binomial, subset = train)
+
+glm.probs = predict(glm.fit, test, type = "response")
+
+glm.pred = rep("Down", length(glm.probs))
+
+glm.pred[glm.probs > 0.5] = "Up"
+Dir = Direction[!train]
+table(glm.pred, Dir)
+
+mean(glm.pred == Dir)
+
+```
+
+#####KNN k =10
+```{r}
+knn.pred = knn(train.X, test.X, train.Direction, k = 10)
+
+table(knn.pred, Dir)
+
+mean(knn.pred == Dir)
+```
+
+#####KNN k = 100
+```{r}
+knn.pred = knn(train.X, test.X, train.Direction, k = 100)
+
+table(knn.pred, Dir)
+
+mean(knn.pred == Dir)
+```
+
+
+Models have comparable performance, but logistic regression is still best
+
+KNN w/k=100 had the worst performance 
+
+
+###Chapter 8 #8
+####8a
+```{r}
+rm(list = ls())
+library(tree) 
+library(randomForest) 
+library(ISLR) 
+data = Carseats 
+attach(data) 
+set.seed(1)
+
+n=dim(data)
+ind = sample(1:n, size=0.2*nrow(data))
+train = data[-ind, ]
+test = data[ind, ]
+
+```
+
+####8b
+```{r}
+tree.data = tree(Sales~., data=Carseats)
+summary(tree.data)
+plot(tree.data)
+text(tree.data, pretty=0)
+
+pred.data=predict(tree.data,test)
+mean((test$Sales - pred.data)^2)
+```
+Observed test error rate is 2.854017
+
+####8c
+```{r}
+cv.data=cv.tree(tree.data, FUN=prune.tree)
+par(mfrow=c(1,2))
+plot(cv.data$size, cv.data$dev, type='b')
+plot(cv.data$k, cv.data$dev, type='b')
+
+pruned.data=prune.tree(tree.data, best=9)
+par(mfrow=c(1,1))
+plot(pruned.data)
+text(pruned.data, pretty=0)
+pred.pruned = predict(pruned.data, test)
+mean((test$Sales - pred.pruned)^2)
+```
+Pruning increases test error rate to 3.472245
+
+####8d
+```{r}
+bag.data=randomForest(Sales~., data=train, mtry=10, ntree=500, importance = TRUE)
+bag.pred=predict(bag.data, test)
+mean((test$Sales - bag.pred)^2)
+
+importance(bag.data)
+```
+Bagging lowered test error rate to 2.58765
+
+Price and ShelveLoc are shown to be the most imporant variables
+
+####8e
+```{r}
+rf.data=randomForest(Sales~., data=train, mtry=5, ntree=500, importance=TRUE)
+rf.pred=predict(rf.data,test)
+mean((test$Sales - rf.pred)^2)
+
+importance(rf.data)
+```
+
+Observed test error rate is 2.58197
+
+Price and ShelveLoc are again the most important variables
+
+Changing m varies test MSE 
+
+
+###Chapter 8 #11
+####11a
+```{r}
+rm(list = ls())
+library(gbm) 
+library(ISLR) 
+data = Caravan 
+attach(data) 
+set.seed(1)
+
+ind = 1:1000
+data$Purchase=ifelse(data$Purchase=='Yes', 1, 0)
+train=data[ind,]
+test=data[-ind,]
+
+```
+
+####11b
+```{r}
+boost.data=gbm(Purchase~., data=train, n.trees=1000, shrinkage=0.01, distribution='bernoulli')
+summary(boost.data)
+```
+PPERSAUT, MKOOPKLA, MOPLHOOG and MBERMIDD are shown to be the most important predictors
+
+
+####11c
+```{r}
+boost.prob=predict(boost.data, test, n.trees=1000, type='response')
+boost.pred = ifelse(boost.prob>0.2,1,0)
+table(test$Purchase, boost.pred)
+
+lm.data=glm(Purchase~., data=train, family=binomial)
+lm.prob=predict(lm.data, test, type='response')
+lm.pred=ifelse(lm.prob>0.2,1,0)
+table(test$Purchase, lm.pred)
+```
+Boosting better than logistic regression in this case
+
+
+###Problem 1: Beauty Pays
+```{r}
+rm(list = ls())
+setwd("~/Desktop/STA S380.17")
+beauty_data=read.csv('BeautyData.csv')
+attach(beauty_data)
+lm.fit = lm(CourseEvals~., data = beauty_data)
+summary(lm.fit)
+```
+
+1. By building a linear model, we can see the effect of the different variables along with ‘beauty’ on course ratings. The equation for this model is as follows: 		
+	CourseEvals = β0 + β1BeautyScore + β2Female + β3Lower + β4NonEnglish + β5TenureTrack + ε 
+The summary in R showed BeautyScore, female, and lower as the strongest predictors of course ratings.  BeautyScore had a positive coefficient, so the higher the beauty score of a professor, the higher the course ratings. Female had a negative coefficient, so female instructors received lower ratings than similar male instructors.  Lower also had a negative coefficient, so lower division classes had lower ratings than higher division.  NonEnglish had a negative coefficient, so instructors with a native language other than English received lower ratings.   Tenure Track has a small negative impact on CourseEvals.  One conclusion that can be drawn is that UT students are biased towards more attractive instructors, male instructors, and instructors in higher division classes. 
+	      
+	2.  Dr. Hamermesh probably means that it can’t really be determined if the higher ratings of the more attractive instructors is 100% due to bias, or if they really are better instructors. Additionally, beauty is an extremely subjective measure, and thus a model using such a measure is unlikely to be reliable/useful.  
+
+
+###Problem 2: Housing Price Structure
+```{r}
+rm(list = ls())
+setwd("~/Desktop/STA S380.17")
+housing_data=read.csv('MidCity.csv')
+attach(housing_data)
+
+n=dim(housing_data)[1]
+
+point1 = rep(0,n)
+point1[Nbhd==1]=1
+
+point2 = rep(0,n)
+point2[Nbhd==2]=1
+
+point3=rep(0,n)
+point3[Nbhd==3]=1
+
+br = rep(0,n)
+br[Brick=='Yes']=1
+
+Price=Price/1000
+Sqft=SqFt/1000
+
+model1 = lm(Price ~ br + point2 + point3 + SqFt + Offers + SqFt + Bedrooms + Bathrooms)
+summary(model1)
+confint(model1)
+
+model2= lm(Price ~ br + point2 + point3 + SqFt + Bedrooms + Bathrooms + br:point3)
+summary(model2)
+confint(model2)
+confint(model2, level=0.99)
+
+```
+1. From linear regression model and confidence interval in R, can conclude that there is a premium for brick houses, since beta for br variable is not 0.
+2. The parameter estimate for point 3 is positive and confidence interval is greater than 0, so we can conclude that there is a premium to live in neighborhood 3.
+3. br:point 3 parameter created to account for brick houses in neighborhood 3.  From the values in the 99% confidence interval for this parameter, we cannot conclude there is a premium for brick houses in neighborhood 3.
+4. From the first 95% confidence interval table, 0 is a possible value for beta for point 2 so you could combine neighborhood 1 & 2 into a single ‘older’ neighborhood.
+
+###Problem 3: What causes what??
+1.  Like with the highly selective vs less selective university example in the podcast, a natural experiment is needed to see the true effect of police.  Many different variables affect crime rates in cities, a simple regression will not accurately describe how cops in the streets affect crime.  While less crime usually leads to less need for cops in the streets, the opposite is not necessarily street. As mentioned by Carlos in class, downtown Chicago has much more cops than downtown Austin, but it’s crime rate is much higher.  
+2.  UPENN researchers were able to isolate this effect due to the fact that the more police were present due to higher threat of terrorism, not normal crime, so it was more of a natural experiment.  Table 2 shows the coefficient for the dummy variable of high alert is negative,  so the crime rate was lower when more police were present due to the high terrorism threat. 
+3. They had to control for Metro ridership to prove that the lower crime rate was actually due to more police, not the high terrorism threat (ie that people weren’t staying home in fear of terrorists, and thus there were less opportunities to commit crimes).
+4.  The table shows interaction of high alert days (more cops).  District 1 (DC) has the highest threat of terrorism so the number of cops will be higher there than in other districts.  The negative coefficient of -2.621 for DC versus -0.571 for other districts proves that crime in DC decreases more on high alert days than in other districts.  
+
+###Problem 4: BART
+```{r}
+library(readr)
+setwd('/Users/hopeknopf/Desktop/STA S380.17/')
+data = read.csv('CAhousing.csv')
+attach(data)
+
+avbed=totalBedrooms/households
+avrooms=totalRooms/households
+avocc=population/households
+logMedVal=log(medianHouseValue)
+data=data[,-c(4,5,9)] 
+data$logMedVal = logMedVal
+
+x=data[,1:6]
+y=medianHouseValue
+head(cbind(x,y))
+
+library(BART)
+
+nd=200 
+burn=50 
+bf = wbart(x,y,nskip=burn,ndpost=nd)
+
+lmf = lm(y~.,data.frame(x,y))
+fitmat = cbind(y,bf$yhat.train.mean,lmf$fitted.values)
+colnames(fitmat)=c("y","BART","Linear")
+cor(fitmat)
+
+n=length(y) 
+ind = sample(1:n,floor(.75*n)) 
+xtrain=x[ind,]; ytrain=y[ind] 
+xtest=x[-ind,]; ytest=y[-ind] 
+
+bf_train = wbart(xtrain,ytrain)
+yhat = predict(bf_train,as.matrix(xtest))
+
+yhat.mean = apply(yhat,2,mean)
+
+plot(ytest,yhat.mean)
+abline(0,1,col=2)
+
+rmse_BART = sqrt(sum((ytest-yhat.mean)^2)/nrow(xtest))
+```
+BART outperforms boosting & RF
+
+###Problem 5: Neural Nets
+```{r}
+rm(list = ls())
+set.seed(500)
+library(MASS)
+data = Boston
+attach(data)
+
+n=dim(data)
+ind = sample(1:n, size=0.2*nrow(data))
+train = data[-ind, ]
+test = data[ind, ]
+
+maxs = apply(data,2,max)
+mins = apply(data,2,min)
+scaled = as.data.frame(scale(data, center=mins, scale=maxs-mins))
+train2=scaled[-ind, ]
+test2=scaled[ind, ]
+
+library(nnet)
+n = names(train2)
+f=as.formula(paste('crim~', paste(n[!n %in% 'crim'], collapse = '+')))
+nn = nnet(f, data=train2, size=1, linout=T)
+summary(nn)
+
+nn2=nnet(f, data=train2, size=3, decay=0.5, linout=T)
+nn3=nnet(f, data=train2, size=5, decay=0.5, linout=T)
+nn4=nnet(f, data=train2, size=10, decay = 0.1, linout=T)
+nn5=nnet(f, data=train2, size=10, decay = 0.001, linout=T)
+```
+
+###Problem 6:Final Project
+ I was a part of Group 8 for the final group project.  Once deciding on a problem and a dataset, we each explored a different model on our dataset individually.  I explored logistic regression for my part.  After cleaning the data, I developed a logistic regression model in R, found the error rate for the model and reported back to my group.  We ultimately decided to go with the random tree model instead, which had a lower error rate than what I found from logistic regression.  From there, we all contributed to the final code that was turned in and the presentation slides.  I made the slides and presented the information on the 5 x-variables we ended up inputting into our model, which we selected through a correlation matrix, chi-square test, and plots in R.  My group met several times to develop our model, presentation, and practice our speaking parts together, and I was present at each meeting.    
